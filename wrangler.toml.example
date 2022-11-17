@@ -1,0 +1,24 @@
+name = "lfg-bot"
+main = "./src/server.js"
+compatibility_date="2022-02-26"
+
+account_id = "<YOUR_ACCOUNT_ID_HERE>"
+workers_dev = true
+
+kv_namespaces = [
+    { binding = "LFG", id = "<YOUR_NAMESPACE_ID_HERE>", preview_id = "<YOUR_PREVIEW_NAMESPACE_ID_HERE>" }
+]
+
+[[rules]]
+type = "ESModule"
+globs = [ "**/*.js" ]
+
+[env.dev]
+
+[env.production]
+
+# [secrets]
+# DISCORD_TOKEN
+# DISCORD_PUBLIC_KEY
+# DISCORD_APPLICATION_ID
+# DISCORD_TEST_GUILD_ID
