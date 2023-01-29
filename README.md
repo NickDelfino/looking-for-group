@@ -33,8 +33,7 @@ To run locally, start up the cloudflare worker locally: `npm run dev`
 
 To get a routable external url, run this command: `npm run ngrok`
 
-This returned url needs to get pasted in the interactions endpoint text box in the developer page:
-https://discord.com/developers/applications/1041907222508212344/information
+This returned url needs to get pasted in the interactions endpoint text box on your app development page.
 
 ### Deploy to cloudflare
 
