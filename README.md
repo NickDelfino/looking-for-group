@@ -43,5 +43,7 @@ The above assumes the wrangler CLI has been installed and connected to the corre
 
 ## Contribute
 
-All contributions welcome. Feel free to create issues for features or bug fixes.
+All contributions welcome. Feel free to create issues for features or bug fixes. 
+
+Join the development and community [discord server](https://discord.gg/MK2WZhuDNp)!
 
