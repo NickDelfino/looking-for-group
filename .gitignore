@@ -5,3 +5,4 @@
 /httpRequests/
 .idea
 wrangler.toml
+node_modules
