@@ -8,7 +8,7 @@
 
 ## What is it? 
 
-Looking for Group ([add the bot here](https://discord.com/oauth2/authorize?client_id=1041907222508212344&scope=applications.commands])) is a Discord bot which helps you find people in your server to play games with. You
+Looking for Group ([add the bot here](https://discord.com/oauth2/authorize?client_id=1041907222508212344&scope=applications.commands)) is a Discord bot which helps you find people in your server to play games with. You
 can announce the game you want to play, when you want to play (minutes from now), and let specific people know you want to play. The bot message has an 
 "I'm in!" button other users in the Discord channel can press to update the message with their handle. See the demo below.
 
