@@ -50,7 +50,7 @@ router.post('/', async (request, env) => {
         }
     } else if (message.type === InteractionType.MESSAGE_COMPONENT) {
         switch (message.data.custom_id.toLowerCase()) {
-            case JOIN_GROUP_COMMAND: {
+            case JOIN_GROUP_COMMAND.name.toLowerCase(): {
                 return joinedGroup(message, env);
             }
             default:

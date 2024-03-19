@@ -34,7 +34,7 @@ export const joinedGroup = async (message, env) => {
 
     if (!currentActiveMessage.joinedUsers.includes(userId)) {
         currentActiveMessage.joinedUsers.push(userId);
-        env.LFG.put(interactionId, JSON.stringify(currentActiveMessage))
+        await env.LFG.put(interactionId, JSON.stringify(currentActiveMessage))
     }
 
     const joinedMessaged = `${currentActiveMessage.originalMessage} ${getCurrentActiveJoinedList(currentActiveMessage.joinedUsers)}`;
