@@ -112,9 +112,13 @@ const createLookingForGroupMessage = (message) => {
     countdownString = `<t:${currentTime}:R>`;
   }
 
-  return `<@${userId}> wants to play \`${
-    message.data.options.find((option) => option.name === "game").value
-  }\` ${countdownString} ${getUserOrRoleMention(message.data)}`;
+  let gameName = message.data.options.find(
+    (option) => option.name === "game"
+  ).value;
+
+  return `<@${userId}> wants to play \`${gameName}\` ${countdownString}. ${getUserOrRoleMention(
+    message.data
+  )}`;
 };
 
 const validateAndReturnTimeFromOption = (timeFromNowMinutesOption) => {
@@ -146,17 +150,7 @@ const getUserOrRoleMention = (messageData) => {
     return "";
   }
 
-  const resolved = messageData.resolved;
-
-  if (resolved.roles && resolved.roles[mention.value]) {
-    return `<@&${mention.value}>`;
-  }
-
-  if (resolved.users && resolved.users[mention.value]) {
-    return `<@${mention.value}>`;
-  }
-
-  return "";
+  return ` Do you want to play ${mention.value}?`;
 };
 
 const getCurrentActiveJoinedList = (joinedUsers) => {
