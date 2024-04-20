@@ -60,6 +60,14 @@ const createLookingForGroupMessage = (message) => {
     countdownString = `<t:${currentTime}:R>`;
   }
 
+  let dateTime = message.data.options.find(
+    (option) => option.name === "datetime"
+  );
+  if (dateTime) {
+    let number = validateAndRetrieveDatetime(dateTime.value);
+    countdownString = `on <t:${number.getTime() / 1000}:f>`;
+  }
+
   let gameName = message.data.options.find(
     (option) => option.name === "game"
   ).value;
@@ -100,6 +108,18 @@ const getUserOrRoleMention = (messageData) => {
 
   return ` Do you want to play ${mention.value}?`;
 };
+
+function validateAndRetrieveDatetime(dateString) {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    throw new JsonResponse(
+      { error: "Datetime is not valid. Double check format." },
+      { status: 400 }
+    );
+  }
+
+  return date;
+}
 
 export const joinLfgMessage = async (message, env, joinedGroup) => {
   const userId = message.member.user.id;
