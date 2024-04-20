@@ -13,7 +13,7 @@
     "fix": "eslint --fix '**/*.js'",
     "lint": "eslint '**/*.js'",
     "register": "node src/register.js",
-    "publish": "wrangler publish -e production"
+    "publish": "wrangler deploy -e production"
   },
   "keywords": [],
   "author": "Nick Delfino",
