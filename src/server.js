@@ -8,15 +8,9 @@ import {
   InteractionType,
   verifyKey,
 } from "discord-interactions";
-import {
-  INVITE_COMMAND,
-  JOIN_GROUP_COMMAND,
-  LEAVE_GROUP_COMMAND,
-  LFG_COMMAND,
-} from "./commands.js";
 import JsonResponse from "./core/JsonResponse.js";
-import { joinedGroup, lookingForGroup } from "./routes/lookingForGroup.js";
-import { invite } from "./routes/invite";
+import { applicationComponentRouteHandler } from "./routes/applicationComponentRouteHandler.js";
+import { messageComponentRouteHandler } from "./routes/messageComponentRouteHandler.js";
 
 const router = Router();
 
@@ -34,40 +28,22 @@ router.get("/", (request, env) => {
  */
 router.post("/", async (request, env) => {
   const message = await request.json();
-  if (message.type === InteractionType.PING) {
-    // The `PING` message is used during the initial webhook handshake, and is
-    // required to configure the webhook in the developer portal.
-    return new JsonResponse({
-      type: InteractionResponseType.PONG,
-    });
-  } else if (message.type === InteractionType.APPLICATION_COMMAND) {
-    // Most user commands will come as `APPLICATION_COMMAND`.
-    switch (message.data.name.toLowerCase()) {
-      case LFG_COMMAND.name.toLowerCase(): {
-        return lookingForGroup(message, env);
-      }
-      case INVITE_COMMAND.name.toLowerCase(): {
-        return invite(message, env);
-      }
-      default:
-        console.error("Unknown Command");
-        return new JsonResponse({ error: "Unknown Type" }, { status: 400 });
+  switch (message.type) {
+    case InteractionType.PING: {
+      return new JsonResponse({
+        type: InteractionResponseType.PONG,
+      });
     }
-  } else if (message.type === InteractionType.MESSAGE_COMPONENT) {
-    switch (message.data.custom_id.toLowerCase()) {
-      case JOIN_GROUP_COMMAND.name.toLowerCase(): {
-        return joinedGroup(message, env, true);
-      }
-      case LEAVE_GROUP_COMMAND.name.toLowerCase(): {
-        return joinedGroup(message, env, false);
-      }
-      default:
-        console.error("Unknown Command");
-        return new JsonResponse({ error: "Unknown Type" }, { status: 400 });
+    case InteractionType.APPLICATION_COMMAND: {
+      return applicationComponentRouteHandler(message, env);
     }
-  } else {
-    console.error("Unknown Type");
-    return new JsonResponse({ error: "Unknown Type" }, { status: 400 });
+    case InteractionType.MESSAGE_COMPONENT: {
+      return messageComponentRouteHandler(message, env);
+    }
+    default: {
+      console.error("Unknown Type");
+      return new JsonResponse({ error: "Unknown Type" }, { status: 400 });
+    }
   }
 });
 

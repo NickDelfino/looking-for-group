@@ -27,12 +27,19 @@ export const LFG_COMMAND = {
       type: 3,
       required: false,
     },
+    {
+      name: "datetime",
+      description:
+        "This accepts valid javascript datetimes for when you want to play e.g. 2024-04-15T12:00:00Z.",
+      type: 3,
+      required: false,
+    },
   ],
 };
 
 export const INVITE_COMMAND = {
   name: "invite",
-  description: "Get an invite link to add the bot to your server.",
+  description: "Get an inviteManager link to add the bot to your server.",
 };
 
 export const JOIN_GROUP_COMMAND = {

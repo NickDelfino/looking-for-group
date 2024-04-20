@@ -6,7 +6,7 @@ import {
 } from "discord-interactions";
 import { JOIN_GROUP_COMMAND, LEAVE_GROUP_COMMAND } from "../commands.js";
 
-export const lookingForGroup = async (message, env) => {
+export const createInitialLfgMessage = async (message, env) => {
   let lookingForGroupMessage = createLookingForGroupMessage(message);
 
   await env.LFG.put(
@@ -42,58 +42,6 @@ export const lookingForGroup = async (message, env) => {
       ],
     },
   });
-};
-
-export const joinedGroup = async (message, env, joinedGroup) => {
-  const userId = message.member.user.id;
-  const interactionId = message.message.interaction.id;
-
-  const currentActiveMessage = JSON.parse(await env.LFG.get(interactionId));
-
-  if (!currentActiveMessage.joinedUsers.includes(userId) && joinedGroup) {
-    currentActiveMessage.joinedUsers.push(userId);
-  } else if (!joinedGroup) {
-    currentActiveMessage.joinedUsers = currentActiveMessage.joinedUsers.filter(
-      (id) => {
-        return id !== userId;
-      }
-    );
-  }
-  await env.LFG.put(interactionId, JSON.stringify(currentActiveMessage));
-
-  const joinedMessaged = `${
-    currentActiveMessage.originalMessage
-  } ${getCurrentActiveJoinedList(currentActiveMessage.joinedUsers)}`;
-
-  try {
-    return new JsonResponse({
-      type: InteractionResponseType.UPDATE_MESSAGE,
-      data: {
-        content: joinedMessaged,
-        components: [
-          {
-            type: MessageComponentTypes.ACTION_ROW,
-            components: [
-              {
-                type: MessageComponentTypes.BUTTON,
-                label: "Join Group!",
-                style: ButtonStyleTypes.PRIMARY,
-                custom_id: JOIN_GROUP_COMMAND.name.toLowerCase(),
-              },
-              {
-                type: MessageComponentTypes.BUTTON,
-                label: "Leave Group!",
-                style: ButtonStyleTypes.DANGER,
-                custom_id: LEAVE_GROUP_COMMAND.name.toLowerCase(),
-              },
-            ],
-          },
-        ],
-      },
-    });
-  } catch (err) {
-    console.error("Error sending message:", err);
-  }
 };
 
 const createLookingForGroupMessage = (message) => {
@@ -151,6 +99,58 @@ const getUserOrRoleMention = (messageData) => {
   }
 
   return ` Do you want to play ${mention.value}?`;
+};
+
+export const joinLfgMessage = async (message, env, joinedGroup) => {
+  const userId = message.member.user.id;
+  const interactionId = message.message.interaction.id;
+
+  const currentActiveMessage = JSON.parse(await env.LFG.get(interactionId));
+
+  if (!currentActiveMessage.joinedUsers.includes(userId) && joinedGroup) {
+    currentActiveMessage.joinedUsers.push(userId);
+  } else if (!joinedGroup) {
+    currentActiveMessage.joinedUsers = currentActiveMessage.joinedUsers.filter(
+      (id) => {
+        return id !== userId;
+      }
+    );
+  }
+  await env.LFG.put(interactionId, JSON.stringify(currentActiveMessage));
+
+  const joinedMessaged = `${
+    currentActiveMessage.originalMessage
+  } ${getCurrentActiveJoinedList(currentActiveMessage.joinedUsers)}`;
+
+  try {
+    return new JsonResponse({
+      type: InteractionResponseType.UPDATE_MESSAGE,
+      data: {
+        content: joinedMessaged,
+        components: [
+          {
+            type: MessageComponentTypes.ACTION_ROW,
+            components: [
+              {
+                type: MessageComponentTypes.BUTTON,
+                label: "Join Group!",
+                style: ButtonStyleTypes.PRIMARY,
+                custom_id: JOIN_GROUP_COMMAND.name.toLowerCase(),
+              },
+              {
+                type: MessageComponentTypes.BUTTON,
+                label: "Leave Group!",
+                style: ButtonStyleTypes.DANGER,
+                custom_id: LEAVE_GROUP_COMMAND.name.toLowerCase(),
+              },
+            ],
+          },
+        ],
+      },
+    });
+  } catch (err) {
+    console.error("Error sending message:", err);
+  }
 };
 
 const getCurrentActiveJoinedList = (joinedUsers) => {
