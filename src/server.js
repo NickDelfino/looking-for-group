@@ -11,6 +11,7 @@ import {
 import JsonResponse from "./core/JsonResponse.js";
 import { applicationComponentRouteHandler } from "./routes/applicationComponentRouteHandler.js";
 import { messageComponentRouteHandler } from "./routes/messageComponentRouteHandler.js";
+import { logMessage } from "./managers/logger.js";
 
 const router = Router();
 
@@ -70,12 +71,14 @@ export default {
         env.DISCORD_PUBLIC_KEY
       );
       if (!isValidRequest) {
-        console.error("Invalid Request");
+        await logMessage(env, "Not valid request");
         return new Response("Bad request signature.", { status: 401 });
       }
     }
 
     // Dispatch the request to the appropriate route
-    return router.handle(request, env);
+    return router.handle(request, env).catch(async (exception) => {
+      await logMessage(env, exception);
+    });
   },
 };

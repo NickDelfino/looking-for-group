@@ -19,7 +19,8 @@
   "author": "Nick Delfino",
   "dependencies": {
     "discord-interactions": "^3.2.0",
-    "itty-router": "^2.5.1"
+    "itty-router": "^2.5.1",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "c8": "^7.11.0",
