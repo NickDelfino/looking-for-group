@@ -21,3 +21,6 @@ kv_namespaces = [
 ]
 vars = { DISCORD_TOKEN = "<DISCORD_TOKEN>", DISCORD_PUBLIC_KEY = "<DISCORD_PUBLIC_KEY>", DISCORD_APPLICATION_ID = "<DISCORD_APPLICATION_ID>" }
 
+[observability]
+enabled = true
+head_sampling_rate = 1
