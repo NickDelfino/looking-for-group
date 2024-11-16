@@ -7,7 +7,8 @@ import {
 import { JOIN_GROUP_COMMAND, LEAVE_GROUP_COMMAND } from "../commands.js";
 
 export const createInitialLfgMessage = async (message, env) => {
-  let lookingForGroupMessage = createLookingForGroupMessage(message);
+  let startTime = getStartTimeFromMessage(message);
+  let lookingForGroupMessage = createLookingForGroupMessage(message, startTime);
 
   await env.LFG.put(
     message.id,
@@ -16,6 +17,22 @@ export const createInitialLfgMessage = async (message, env) => {
       originalMessage: lookingForGroupMessage,
     })
   );
+
+  let startTimeToBind = startTime !== undefined ? startTime : null;
+
+  await env.DB.prepare(
+    "INSERT INTO LookingForGroupMessages " +
+      " (messageId, content, startTime, createdBy, createdAt) " +
+      " VALUES (?1, ?2, ?3, ?4, ?5)"
+  )
+    .bind(
+      message.id,
+      lookingForGroupMessage,
+      startTimeToBind,
+      message.member.user.id,
+      Date.now()
+    )
+    .run();
 
   return new JsonResponse({
     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -119,6 +136,28 @@ function validateAndRetrieveDatetime(dateString) {
   }
 
   return date;
+}
+
+function getStartTimeFromMessage(message) {
+  let startTime;
+
+  const timeFromNowMinutes = validateAndReturnTimeFromOption(
+    message.data.options.find((option) => option.name === "time")
+  );
+
+  if (timeFromNowMinutes || timeFromNowMinutes === 0) {
+    startTime = Math.round(Date.now() + Number(timeFromNowMinutes) * 60 * 1000);
+  }
+
+  let dateTime = message.data.options.find(
+    (option) => option.name === "datetime"
+  );
+  if (dateTime) {
+    let validatedDateTime = validateAndRetrieveDatetime(dateTime.value);
+    startTime = validatedDateTime.getTime();
+  }
+
+  return startTime;
 }
 
 export const joinLfgMessage = async (message, env, joinedGroup) => {
