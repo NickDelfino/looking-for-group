@@ -164,6 +164,7 @@ export const joinLfgMessage = async (message, env, joinedGroup) => {
   const userId = message.member.user.id;
   const interactionId = message.message.interaction.id;
 
+  //TODO once the new D1 database has been running for a few days, swap this out to an sql call.
   const currentActiveMessage = JSON.parse(await env.LFG.get(interactionId));
 
   if (!currentActiveMessage.joinedUsers.includes(userId) && joinedGroup) {
