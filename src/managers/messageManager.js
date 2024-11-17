@@ -168,13 +168,26 @@ export const joinLfgMessage = async (message, env, joinedGroup) => {
 
   if (!currentActiveMessage.joinedUsers.includes(userId) && joinedGroup) {
     currentActiveMessage.joinedUsers.push(userId);
+    await env.DB.prepare(
+      "INSERT INTO JoinedUsers(userId, messagedId, joinedAt)" +
+        "VALUES (?1, ?2, ?3) " +
+        "ON CONFLICT(userId, messageId) DO NOTHING;"
+    )
+      .bind(userId, interactionId, Date.now())
+      .run();
   } else if (!joinedGroup) {
     currentActiveMessage.joinedUsers = currentActiveMessage.joinedUsers.filter(
       (id) => {
         return id !== userId;
       }
     );
+    await env.DB.prepare(
+      "DELETE FROM JoinedUsers WHERE userId = ?1 AND messageId = ?2"
+    )
+      .bind(userId, interactionId)
+      .run();
   }
+
   await env.LFG.put(interactionId, JSON.stringify(currentActiveMessage));
 
   const joinedMessaged = `${
