@@ -154,12 +154,12 @@ function getStartTimeFromMessage(message) {
 
 export const joinLfgMessage = async (message, env, joinedGroup) => {
   const userId = message.member.user.id;
-  const interactionId = message.message.interaction.id;
+  const messageId = message.message.interaction.id;
 
   const joinedUsersResults = await env.DB.prepare(
     "SELECT userId FROM JoinedUsers WHERE messageId = ?1 ORDER BY joinedAt ASC"
   )
-    .bind(interactionId.toString())
+    .bind(messageId.toString())
     .all();
 
   let joinedUsers = joinedUsersResults?.results?.map((row) => row.userId) || [];
@@ -167,7 +167,7 @@ export const joinLfgMessage = async (message, env, joinedGroup) => {
   const lookingForGroupMessage = await env.DB.prepare(
     "SELECT content FROM LookingForGroupMessages WHERE messageId = ?1"
   )
-    .bind(interactionId.toString())
+    .bind(messageId.toString())
     .first();
 
   if (!lookingForGroupMessage) {
@@ -184,14 +184,14 @@ export const joinLfgMessage = async (message, env, joinedGroup) => {
         "VALUES (?1, ?2, ?3) " +
         "ON CONFLICT(userId, messageId) DO NOTHING;"
     )
-      .bind(userId.toString(), interactionId.toString(), Date.now())
+      .bind(userId.toString(), messageId.toString(), Date.now())
       .run();
   } else if (!joinedGroup) {
     joinedUsers = joinedUsers.filter((id) => id !== userId);
     await env.DB.prepare(
       "DELETE FROM JoinedUsers WHERE userId = ?1 AND messageId = ?2"
     )
-      .bind(userId.toString(), interactionId.toString())
+      .bind(userId.toString(), messageId.toString())
       .run();
   }
 
