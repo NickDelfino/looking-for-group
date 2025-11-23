@@ -26,8 +26,8 @@ When registering new commands or updating existing commands, run this on the com
 ### Run locally
 
 To deploy to cloudflare, copy the `wrangler.toml.example` and rename it to
-`wrangler.toml`. Fill in the blanks with the correct information. You'll need your cloudflare account id,
-keyspace id, and preview keyspace id.
+`wrangler.toml`. Fill in the blanks with the correct information. You'll need your cloudflare account id
+and your D1 database ids for each environment.
 
 To run locally, start up the cloudflare worker locally: `npm run dev`
 
