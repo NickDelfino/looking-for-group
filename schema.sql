@@ -1,17 +1,18 @@
+-- this is primarily just for reference. TEXT has to be used for IDs as they are bigints and would otherwise be truncated.
 
 -- add looking for group messages table
 CREATE TABLE IF NOT EXISTS LookingForGroupMessages (
-messageId INTEGER PRIMARY KEY NOT NULL,
+messageId TEXT PRIMARY KEY NOT NULL,
 content TEXT NOT NULL,
 startTime INTEGER NULL,
-createdBy INTEGER NOT NULL,
+createdBy TEXT NOT NULL,
 createdAt INTEGER NOT NULL
 );
 
 -- add joined users table
 CREATE TABLE IF NOT EXISTS JoinedUsers(
-userId INTEGER NOT NULL,
-messageId INTEGER NOT NULL,
+userId TEXT NOT NULL,
+messageId TEXT NOT NULL,
 joinedAt INTEGER NOT NULL,
 PRIMARY KEY (userId, messageId)
 );

@@ -41,6 +41,17 @@ Once this is complete, to deploy to cloudflare, use `npm run publish`.
 
 The above assumes the wrangler CLI has been installed and connected to the correct project.
 
+### Cloudflare D1 Sql Setup
+
+[D1 Migrations Instructions](https://developers.cloudflare.com/workers/wrangler/commands/#d1-migrations-create)
+
+#### Running Migrations
+Dev:
+`wrangler d1 migrations apply <QA_DATABASE_NAME> -e dev --remote`
+
+Production:
+`wrangler d1 migrations apply <PROD_DATABASE_NAME> -e production --remote`
+
 ## Contribute
 
 All contributions welcome. Feel free to create issues for features or bug fixes. 
