@@ -154,12 +154,12 @@ function getStartTimeFromMessage(message) {
 
 export const joinLfgMessage = async (message, env, joinedGroup) => {
   const userId = message.member.user.id;
-  const interactionId = message.message.interaction.id;
+  const messageId = message.message.id;
 
   const currentActiveMessage = await env.DB.prepare(
     "SELECT content FROM LookingForGroupMessages WHERE messageId = ?1"
   )
-    .bind(interactionId)
+    .bind(messageId)
     .first();
 
   if (!currentActiveMessage) {
@@ -175,20 +175,20 @@ export const joinLfgMessage = async (message, env, joinedGroup) => {
         "VALUES (?1, ?2, ?3) " +
         "ON CONFLICT(userId, messageId) DO NOTHING;"
     )
-      .bind(userId, interactionId, Date.now())
+      .bind(userId, messageId, Date.now())
       .run();
   } else {
     await env.DB.prepare(
       "DELETE FROM JoinedUsers WHERE userId = ?1 AND messageId = ?2"
     )
-      .bind(userId, interactionId)
+      .bind(userId, messageId)
       .run();
   }
 
   const joinedUsersResult = await env.DB.prepare(
     "SELECT userId FROM JoinedUsers WHERE messageId = ?1 ORDER BY joinedAt ASC"
   )
-    .bind(interactionId)
+    .bind(messageId)
     .all();
 
   const joinedUsers = joinedUsersResult.results.map((row) => row.userId);
