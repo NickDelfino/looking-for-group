@@ -174,7 +174,7 @@ export const joinLfgMessage = async (message, env, joinedGroup) => {
         "VALUES (?1, ?2, ?3) " +
         "ON CONFLICT(userId, messageId) DO NOTHING;"
     )
-      .bind(userId, interactionId, Date.now())
+      .bind(userId.toString(), interactionId.toString(), Date.now())
       .run();
   } else if (!joinedGroup) {
     currentActiveMessage.joinedUsers = currentActiveMessage.joinedUsers.filter(
@@ -185,7 +185,7 @@ export const joinLfgMessage = async (message, env, joinedGroup) => {
     await env.DB.prepare(
       "DELETE FROM JoinedUsers WHERE userId = ?1 AND messageId = ?2"
     )
-      .bind(userId, interactionId)
+      .bind(userId.toString(), interactionId.toString())
       .run();
   }
 
