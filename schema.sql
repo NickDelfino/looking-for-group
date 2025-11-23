@@ -1,4 +1,4 @@
--- this is primarily just for reference
+-- this is primarily just for reference. TEXT has to be used for IDs as they are bigints and would otherwise be truncated.
 
 -- add looking for group messages table
 CREATE TABLE IF NOT EXISTS LookingForGroupMessages (
