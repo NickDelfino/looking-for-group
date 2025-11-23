@@ -156,13 +156,12 @@ export const joinLfgMessage = async (message, env, joinedGroup) => {
   const userId = message.member.user.id;
   const messageId = message.message.interaction.id;
 
-  const joinedUsersResults = await env.DB.prepare(
-    "SELECT userId FROM JoinedUsers WHERE messageId = ?1 ORDER BY joinedAt ASC"
-  )
-    .bind(messageId.toString())
-    .all();
-
-  let joinedUsers = joinedUsersResults?.results?.map((row) => row.userId) || [];
+  const joinedUsers = await updateJoinedUsers(
+    env,
+    messageId,
+    userId,
+    joinedGroup
+  );
 
   const lookingForGroupMessage = await env.DB.prepare(
     "SELECT content FROM LookingForGroupMessages WHERE messageId = ?1"
@@ -176,6 +175,28 @@ export const joinLfgMessage = async (message, env, joinedGroup) => {
       { status: 404 }
     );
   }
+
+  try {
+    return new JsonResponse({
+      type: InteractionResponseType.UPDATE_MESSAGE,
+      data: buildUpdatedLfgMessagePayload(
+        lookingForGroupMessage.content,
+        joinedUsers
+      ),
+    });
+  } catch (err) {
+    console.error("Error sending message:", err);
+  }
+};
+
+const updateJoinedUsers = async (env, messageId, userId, joinedGroup) => {
+  const joinedUsersResults = await env.DB.prepare(
+    "SELECT userId FROM JoinedUsers WHERE messageId = ?1 ORDER BY joinedAt ASC"
+  )
+    .bind(messageId.toString())
+    .all();
+
+  let joinedUsers = joinedUsersResults?.results?.map((row) => row.userId) || [];
 
   if (!joinedUsers.includes(userId) && joinedGroup) {
     joinedUsers.push(userId);
@@ -195,40 +216,31 @@ export const joinLfgMessage = async (message, env, joinedGroup) => {
       .run();
   }
 
-  const joinedMessaged = `${lookingForGroupMessage.content} ${getCurrentActiveJoinedList(
-    joinedUsers
-  )}`;
-
-  try {
-    return new JsonResponse({
-      type: InteractionResponseType.UPDATE_MESSAGE,
-      data: {
-        content: joinedMessaged,
-        components: [
-          {
-            type: MessageComponentTypes.ACTION_ROW,
-            components: [
-              {
-                type: MessageComponentTypes.BUTTON,
-                label: "Join Group!",
-                style: ButtonStyleTypes.PRIMARY,
-                custom_id: JOIN_GROUP_COMMAND.name.toLowerCase(),
-              },
-              {
-                type: MessageComponentTypes.BUTTON,
-                label: "Leave Group!",
-                style: ButtonStyleTypes.DANGER,
-                custom_id: LEAVE_GROUP_COMMAND.name.toLowerCase(),
-              },
-            ],
-          },
-        ],
-      },
-    });
-  } catch (err) {
-    console.error("Error sending message:", err);
-  }
+  return joinedUsers;
 };
+
+const buildUpdatedLfgMessagePayload = (content, joinedUsers) => ({
+  content: `${content} ${getCurrentActiveJoinedList(joinedUsers)}`,
+  components: [
+    {
+      type: MessageComponentTypes.ACTION_ROW,
+      components: [
+        {
+          type: MessageComponentTypes.BUTTON,
+          label: "Join Group!",
+          style: ButtonStyleTypes.PRIMARY,
+          custom_id: JOIN_GROUP_COMMAND.name.toLowerCase(),
+        },
+        {
+          type: MessageComponentTypes.BUTTON,
+          label: "Leave Group!",
+          style: ButtonStyleTypes.DANGER,
+          custom_id: LEAVE_GROUP_COMMAND.name.toLowerCase(),
+        },
+      ],
+    },
+  ],
+});
 
 const getCurrentActiveJoinedList = (joinedUsers) => {
   if (joinedUsers.length > 0) {
