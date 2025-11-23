@@ -169,16 +169,7 @@ export const joinLfgMessage = async (message, env, joinedGroup) => {
     );
   }
 
-  const joinedUsersResult = await env.DB.prepare(
-    "SELECT userId FROM JoinedUsers WHERE messageId = ?1 ORDER BY joinedAt ASC"
-  )
-    .bind(interactionId)
-    .all();
-
-  let joinedUsers = joinedUsersResult.results.map((row) => row.userId);
-
-  if (!joinedUsers.includes(userId) && joinedGroup) {
-    joinedUsers.push(userId);
+  if (joinedGroup) {
     await env.DB.prepare(
       "INSERT INTO JoinedUsers(userId, messageId, joinedAt)" +
         "VALUES (?1, ?2, ?3) " +
@@ -186,16 +177,21 @@ export const joinLfgMessage = async (message, env, joinedGroup) => {
     )
       .bind(userId, interactionId, Date.now())
       .run();
-  } else if (!joinedGroup) {
-    joinedUsers = joinedUsers.filter((id) => {
-      return id !== userId;
-    });
+  } else {
     await env.DB.prepare(
       "DELETE FROM JoinedUsers WHERE userId = ?1 AND messageId = ?2"
     )
       .bind(userId, interactionId)
       .run();
   }
+
+  const joinedUsersResult = await env.DB.prepare(
+    "SELECT userId FROM JoinedUsers WHERE messageId = ?1 ORDER BY joinedAt ASC"
+  )
+    .bind(interactionId)
+    .all();
+
+  const joinedUsers = joinedUsersResult.results.map((row) => row.userId);
 
   const joinedMessaged = `${currentActiveMessage.content} ${getCurrentActiveJoinedList(
     joinedUsers
