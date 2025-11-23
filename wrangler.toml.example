@@ -12,7 +12,6 @@ globs = [ "**/*.js" ]
 [env.dev]
 kv_namespaces = [
     { binding = "LFG", id="<DEV_KV_ID>" }
-    { binding = "errors", id = "<DEV_ERRORS_KV_ID>"}
 ]
 d1_databases = [
     { binding = "DB", database_name="<DEV_DATABASE_NAME>", database_id="<DEV_UUID>", remote = true}
@@ -22,7 +21,6 @@ vars = { DISCORD_TOKEN = "<DISCORD_TOKEN>", DISCORD_PUBLIC_KEY = "<DISCORD_PUBLI
 [env.production]
 kv_namespaces = [
     { binding = "LFG", id = "<PROD_KV_ID>" }
-    { binding = "errors", id = "<PROD_ERRORS_KV_ID>"}
 ]
 d1_databases = [
     { binding = "DB", database_name="<PROD_DATABASE_NAME>", database_id="<PROD_UUID>"}
