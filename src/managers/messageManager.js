@@ -10,14 +10,6 @@ export const createInitialLfgMessage = async (message, env) => {
   let startTime = getStartTimeFromMessage(message);
   let lookingForGroupMessage = createLookingForGroupMessage(message, startTime);
 
-  await env.LFG.put(
-    message.id,
-    JSON.stringify({
-      joinedUsers: [],
-      originalMessage: lookingForGroupMessage,
-    })
-  );
-
   let startTimeToBind = startTime !== undefined ? startTime : null;
 
   await env.DB.prepare(
@@ -162,38 +154,50 @@ function getStartTimeFromMessage(message) {
 
 export const joinLfgMessage = async (message, env, joinedGroup) => {
   const userId = message.member.user.id;
-  const interactionId = message.message.interaction.id;
+  const messageId = message.message.interaction.id;
 
-  //TODO once the new D1 database has been running for a few days, swap this out to an sql call.
-  const currentActiveMessage = JSON.parse(await env.LFG.get(interactionId));
+  const joinedUsersResults = await env.DB.prepare(
+    "SELECT userId FROM JoinedUsers WHERE messageId = ?1 ORDER BY joinedAt ASC"
+  )
+    .bind(messageId.toString())
+    .all();
 
-  if (!currentActiveMessage.joinedUsers.includes(userId) && joinedGroup) {
-    currentActiveMessage.joinedUsers.push(userId);
+  let joinedUsers = joinedUsersResults?.results?.map((row) => row.userId) || [];
+
+  const lookingForGroupMessage = await env.DB.prepare(
+    "SELECT content FROM LookingForGroupMessages WHERE messageId = ?1"
+  )
+    .bind(messageId.toString())
+    .first();
+
+  if (!lookingForGroupMessage) {
+    return new JsonResponse(
+      { error: "Unable to find original looking for group message" },
+      { status: 404 }
+    );
+  }
+
+  if (!joinedUsers.includes(userId) && joinedGroup) {
+    joinedUsers.push(userId);
     await env.DB.prepare(
       "INSERT INTO JoinedUsers(userId, messageId, joinedAt)" +
         "VALUES (?1, ?2, ?3) " +
         "ON CONFLICT(userId, messageId) DO NOTHING;"
     )
-      .bind(userId.toString(), interactionId.toString(), Date.now())
+      .bind(userId.toString(), messageId.toString(), Date.now())
       .run();
   } else if (!joinedGroup) {
-    currentActiveMessage.joinedUsers = currentActiveMessage.joinedUsers.filter(
-      (id) => {
-        return id !== userId;
-      }
-    );
+    joinedUsers = joinedUsers.filter((id) => id !== userId);
     await env.DB.prepare(
       "DELETE FROM JoinedUsers WHERE userId = ?1 AND messageId = ?2"
     )
-      .bind(userId.toString(), interactionId.toString())
+      .bind(userId.toString(), messageId.toString())
       .run();
   }
 
-  await env.LFG.put(interactionId, JSON.stringify(currentActiveMessage));
-
-  const joinedMessaged = `${
-    currentActiveMessage.originalMessage
-  } ${getCurrentActiveJoinedList(currentActiveMessage.joinedUsers)}`;
+  const joinedMessaged = `${lookingForGroupMessage.content} ${getCurrentActiveJoinedList(
+    joinedUsers
+  )}`;
 
   try {
     return new JsonResponse({
